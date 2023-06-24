@@ -1,6 +1,6 @@
 {
-    "name": "agro2",
-    "short_name": "agro2",
+    "name": "agro",
+    "short_name": "agro",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
