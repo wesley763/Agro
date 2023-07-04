@@ -1,47 +1,25 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-class CadastroPage extends StatelessWidget {
-  final TextEditingController nomeController = TextEditingController();
-  final TextEditingController cpfController = TextEditingController();
-  final TextEditingController numeroController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController();
+class CadastroAnimalPage extends StatefulWidget {
+  @override
+  _CadastroAnimalPageState createState() => _CadastroAnimalPageState();
+}
 
-  Future<void> cadastrarUsuario() async {
-    String url = 'http://127.0.0.1:8000/user/';
-    Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
-    Map<String, String> body = {
-      "nome": nomeController.text,
-      "cpf": cpfController.text,
-      "numero": numeroController.text,
-      "email": emailController.text,
-      "senha": senhaController.text,
-    };
+class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
+  List<String> categorias = ['Cavalo', 'Vaca', 'Porco', 'Frango', 'Cabra'];
+  String? selectedCategoria;
 
-    http.Response response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(body),
-    );
-
-    if (response.statusCode == 200) {
-      // Sucesso no cadastro
-      print('Usuário cadastrado com sucesso');
-    } else {
-      // Falha no cadastro
-      print('Falha no cadastro do usuário');
-    }
+  @override
+  void initState() {
+    super.initState();
+    selectedCategoria = categorias[0];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cadastro'),
+        title: Text('Cadastro de Animal'),
         backgroundColor: Color.fromRGBO(1, 26, 100, 1),
       ),
       backgroundColor: Color.fromRGBO(1, 26, 100, 1),
@@ -51,8 +29,40 @@ class CadastroPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              DropdownButtonFormField<String>(
+                value: selectedCategoria,
+                items: categorias.map((categoria) {
+                  return DropdownMenuItem<String>(
+                    value: categoria,
+                    child: Text(
+                      categoria,
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedCategoria = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Categoria',
+                  labelStyle: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 20.0),
               TextFormField(
-                controller: nomeController,
                 decoration: InputDecoration(
                   labelText: 'Nome',
                   labelStyle: TextStyle(
@@ -63,12 +73,14 @@ class CadastroPage extends StatelessWidget {
                     borderSide: BorderSide(color: Colors.blue),
                   ),
                 ),
+                style: TextStyle(
+                  color: Colors.white,
+                ),
               ),
               SizedBox(height: 20.0),
               TextFormField(
-                controller: cpfController,
                 decoration: InputDecoration(
-                  labelText: 'CPF',
+                  labelText: 'Idade',
                   labelStyle: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.bold,
@@ -77,12 +89,14 @@ class CadastroPage extends StatelessWidget {
                     borderSide: BorderSide(color: Colors.blue),
                   ),
                 ),
+                style: TextStyle(
+                  color: Colors.white,
+                ),
               ),
               SizedBox(height: 20.0),
               TextFormField(
-                controller: numeroController,
                 decoration: InputDecoration(
-                  labelText: 'Numero de',
+                  labelText: 'Raça',
                   labelStyle: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.bold,
@@ -91,12 +105,14 @@ class CadastroPage extends StatelessWidget {
                     borderSide: BorderSide(color: Colors.blue),
                   ),
                 ),
+                style: TextStyle(
+                  color: Colors.white,
+                ),
               ),
               SizedBox(height: 20.0),
               TextFormField(
-                controller: emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  labelText: 'Peso',
                   labelStyle: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.bold,
@@ -105,21 +121,9 @@ class CadastroPage extends StatelessWidget {
                     borderSide: BorderSide(color: Colors.blue),
                   ),
                 ),
-              ),
-              SizedBox(height: 20.0),
-              TextFormField(
-                controller: senhaController,
-                decoration: InputDecoration(
-                  labelText: 'Senha',
-                  labelStyle: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
+                style: TextStyle(
+                  color: Colors.white,
                 ),
-                obscureText: true,
               ),
               SizedBox(height: 30.0),
               Container(
@@ -130,7 +134,9 @@ class CadastroPage extends StatelessWidget {
                   color: Colors.blue,
                   elevation: 7.0,
                   child: GestureDetector(
-                    onTap: cadastrarUsuario,
+                    onTap: () {
+                      // Adicione aqui a lógica para cadastrar o animal
+                    },
                     child: Center(
                       child: Text(
                         'CADASTRAR',

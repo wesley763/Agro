@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'cadastro_usuario.dart';
 import 'home.dart';
 
@@ -18,13 +20,73 @@ class MyApp extends StatelessWidget {
       home: LoginPage(),
       routes: {
         '/cadastro': (context) => CadastroPage(),
-        '/home':(context) => HomePage()
+        '/home': (context) => HomePage(),
       },
     );
   }
 }
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  String errorMessage = '';
+
+  Future<void> login(BuildContext context) async {
+    var url = Uri.parse('http://127.0.0.1:8000/user/');
+
+    var body = {
+      "nome": usernameController.text,
+      "senha": passwordController.text,
+    };
+
+    var headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    var response = await http.post(url, headers: headers, body: jsonEncode(body));
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      // Login bem-sucedido
+      Navigator.pushNamed(context, '/home');
+      
+
+    } else {
+      // Algo deu errado durante o login
+      setState(() {
+        if (response.statusCode == 401) {
+          errorMessage = 'Usuário ou senha incorretos. Por favor, verifique suas credenciais.';
+        } else {
+          errorMessage = 'Ocorreu um erro durante o login. Por favor, tente novamente.';
+        }
+      });
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Erro de Login'),
+            content: Text(errorMessage),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Fechar'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,9 +102,9 @@ class LoginPage extends StatelessWidget {
                 width: 300.0,
                 height: 300.0,
               ),
-
               SizedBox(height: 30.0),
               TextFormField(
+                controller: usernameController,
                 decoration: InputDecoration(
                   labelText: 'Usuário',
                   labelStyle: TextStyle(
@@ -56,10 +118,11 @@ class LoginPage extends StatelessWidget {
               ),
               SizedBox(height: 20.0),
               TextFormField(
+                controller: passwordController,
                 decoration: InputDecoration(
                   labelText: 'Senha',
                   labelStyle: TextStyle(
-                    color: Colors.grey,
+                    color: Color.fromARGB(255, 193, 186, 186),
                     fontWeight: FontWeight.bold,
                   ),
                   focusedBorder: UnderlineInputBorder(
@@ -78,7 +141,7 @@ class LoginPage extends StatelessWidget {
                   elevation: 7.0,
                   child: GestureDetector(
                     onTap: () {
-                       Navigator.pushNamed(context, '/home');
+                      login(context);
                     },
                     child: Center(
                       child: Text(
@@ -121,9 +184,8 @@ class LoginPage extends StatelessWidget {
                           'Entrar com o Facebook',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.white, // Definir a cor do texto como azul
-        ),
-                         
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -131,8 +193,7 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20.0),
-
-               Container(
+              Container(
                 height: 50.0,
                 child: Material(
                   borderRadius: BorderRadius.circular(20.0),
@@ -141,7 +202,7 @@ class LoginPage extends StatelessWidget {
                   elevation: 7.0,
                   child: GestureDetector(
                     onTap: () {
-                    Navigator.pushNamed(context, '/cadastro');
+                      Navigator.pushNamed(context, '/cadastro');
                     },
                     child: Center(
                       child: Text(
@@ -155,6 +216,13 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(height: 20.0),
+              errorMessage.isNotEmpty
+                  ? Text(
+                      errorMessage,
+                      style: TextStyle(color: Colors.red),
+                    )
+                  : Container(),
             ],
           ),
         ),
