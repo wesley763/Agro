@@ -10,11 +10,11 @@ class CadastroPage extends StatelessWidget {
   final TextEditingController senhaController = TextEditingController();
 
   Future<void> cadastrarUsuario() async {
-    String url = 'http://127.0.0.1:8000/user/';
+    String url = 'http://192.168.235.208:8000/user/';
     Map<String, String> headers = {
       'Content-Type': 'application/json',
     };
-    Map<String, String> body = {
+    Map<String, dynamic> userData = {
       "nome": nomeController.text,
       "cpf": cpfController.text,
       "numero": numeroController.text,
@@ -22,18 +22,22 @@ class CadastroPage extends StatelessWidget {
       "senha": senhaController.text,
     };
 
-    http.Response response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    try {
+      http.Response response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(userData),
+      );
 
-    if (response.statusCode == 200) {
-      // Sucesso no cadastro
-      print('Usuário cadastrado com sucesso');
-    } else {
-      // Falha no cadastro
-      print('Falha no cadastro do usuário');
+      if (response.statusCode == 201) {
+        // Sucesso no cadastro
+        print('Usuário cadastrado com sucesso');
+      } else {
+        // Falha no cadastro
+        print('Falha no cadastro do usuário');
+      }
+    } catch (error) {
+      print('Erro ao enviar solicitação POST: $error');
     }
   }
 
@@ -82,7 +86,7 @@ class CadastroPage extends StatelessWidget {
               TextFormField(
                 controller: numeroController,
                 decoration: InputDecoration(
-                  labelText: 'Numero de',
+                  labelText: 'Número',
                   labelStyle: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.bold,

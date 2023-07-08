@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'cadastro_usuario.dart';
-import 'home.dart';
+import 'package:agro/home.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,6 +26,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class Usuario {
+
+  final String nome;
+
+  Usuario({ required this.nome});
+
+  factory Usuario.fromJson(Map<String, dynamic> json) {
+    return Usuario(
+    
+      nome: json['nome']
+    );
+  }
+}
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -37,28 +51,50 @@ class _LoginPageState extends State<LoginPage> {
   String errorMessage = '';
 
   Future<void> login(BuildContext context) async {
-    var url = Uri.parse('http://127.0.0.1:8000/user/');
-
-    var body = {
-      "nome": usernameController.text,
-      "senha": passwordController.text,
-    };
+    var url = Uri.parse('http://192.168.235.208:8000/user/');
 
     var headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
 
-    var response = await http.post(url, headers: headers, body: jsonEncode(body));
+    var queryParams = {
+      'nome': usernameController.text,
+      'senha': passwordController.text,
+    };
+
+    var uri = Uri.parse(url.toString() + '?' + Uri(queryParameters: queryParams).query);
+
+    var response = await http.get(uri, headers: headers);
     print(response.body);
 
     if (response.statusCode == 200) {
-      // Login bem-sucedido
-      Navigator.pushNamed(context, '/home');
-      
+      var responseData = jsonDecode(response.body);
 
+      if (responseData is List) {
+        // Se a resposta for uma lista, você precisa definir a lógica apropriada para lidar com a lista de usuários retornados
+        // Aqui, você pode decidir o que fazer com a lista de usuários retornados
+
+        List<Usuario> usuarios = [];
+        responseData.forEach((item) {
+          usuarios.add(Usuario.fromJson(item));
+        });
+
+        // Exemplo de como acessar os dados de um usuário específico da lista
+        var primeiroUsuario = usuarios[0];
+        
+        print('Nome do usuário: ${primeiroUsuario.nome}');
+      } else if (responseData is Map<String, dynamic>) {
+        // Se a resposta for um mapa, você pode continuar o processamento conforme antes
+
+        var usuario = Usuario.fromJson(responseData);
+
+       
+        print('Nome do usuário: ${usuario.nome}');
+      }
+
+      Navigator.pushNamed(context, '/home');
     } else {
-      // Algo deu errado durante o login
       setState(() {
         if (response.statusCode == 401) {
           errorMessage = 'Usuário ou senha incorretos. Por favor, verifique suas credenciais.';
@@ -230,4 +266,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
