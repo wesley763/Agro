@@ -21,12 +21,12 @@ class _VeterinaryRemindersPageState extends State<VeterinaryRemindersPage> {
         itemBuilder: (context, index) {
           Reminder reminder = reminders[index];
           return ListTile(
-            title: Text(reminder.careType),
+            title: Text(reminder.careType, style: TextStyle(color: Colors.white)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Data: ${reminder.date}'),
-                Text('Hora: ${reminder.time}'),
+                Text('Data: ${reminder.date}', style: TextStyle(color: Colors.white)),
+                Text('Hora: ${reminder.time}', style: TextStyle(color: Colors.white)),
               ],
             ),
           );

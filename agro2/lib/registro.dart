@@ -130,7 +130,7 @@ class AnimalDetailsPage extends StatelessWidget {
             SizedBox(height: 8.0),
             Text('Nome: ${animal['nome']}', style: TextStyle(color: Colors.white)),
             SizedBox(height: 8.0),
-            Text('Idade: ${animal['idade']}', style: TextStyle(color: Colors.white)),
+            Text('Nascimento: ${animal['nascimento']}', style: TextStyle(color: Colors.white)),
             SizedBox(height: 8.0),
             Text('Raça: ${animal['raca']}', style: TextStyle(color: Colors.white)),
             SizedBox(height: 8.0),
