@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class VaccinesPage extends StatefulWidget {
   @override
@@ -8,7 +10,58 @@ class VaccinesPage extends StatefulWidget {
 }
 
 class _VaccinesPageState extends State<VaccinesPage> {
+  
   List<Vaccine> vaccines = [];
+
+
+  Future<List<Vaccine>> fetchVaccines() async {
+    try {
+      final response = await http.get(Uri.parse('http://10.0.0.206:8000/vacina/'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        List<Vaccine> fetchedVaccines = [];
+        for (var vaccineData in data) {
+          Vaccine vaccine = Vaccine(
+            name: vaccineData['nome_vacina'],
+            administrationDate: vaccineData['data_administracao'],
+            expirationDate: vaccineData['data_vencimento'],
+          );
+          fetchedVaccines.add(vaccine);
+        }
+        return fetchedVaccines;
+      } else {
+        throw Exception('Failed to fetch vaccines: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Failed to fetch vaccines: $error');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchVaccines().then((fetchedVaccines) {
+      setState(() {
+        vaccines = fetchedVaccines;
+      });
+    }).catchError((error) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Erro'),
+          content: Text('Falha ao buscar as vacinas.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Ok'),
+            ),
+          ],
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +69,21 @@ class _VaccinesPageState extends State<VaccinesPage> {
       appBar: AppBar(
         title: Text('Registro de Vacinas'),
       ),
-      backgroundColor: Color.fromRGBO(1, 26, 100, 1), // Altere a cor de fundo para o azul desejado
+      backgroundColor: Color.fromRGBO(1, 26, 100, 1),
       body: ListView.builder(
         itemCount: vaccines.length,
         itemBuilder: (context, index) {
           Vaccine vaccine = vaccines[index];
           return ListTile(
-            title: Text(vaccine.name),
+            title: Text(
+              vaccine.name,
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 255, 255)),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Data de Administração: ${vaccine.administrationDate}'),
-                Text('Data de Vencimento: ${vaccine.expirationDate}'),
+                Text('Data de Administração: ${vaccine.administrationDate}', style: TextStyle(color: Colors.white)),
+                Text('Data de Vencimento: ${vaccine.expirationDate}', style: TextStyle(color: Colors.white)),
               ],
             ),
           );
@@ -98,6 +154,30 @@ class _AddVaccineDialogState extends State<AddVaccineDialog> {
     );
   }
 
+  Future<void> addVaccineToAPI(Vaccine vaccine) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.0.206:8000/vacina/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'nome_vacina': vaccine.name,
+          'data_administracao': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(vaccine.administrationDate)),
+          'data_vencimento': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(vaccine.expirationDate)),
+        }),
+      );
+      if (response.statusCode == 201) {
+        widget.onVaccineAdded(vaccine);
+        Navigator.of(context).pop();
+      } else {
+        throw Exception('Failed to add vaccine to API: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Failed to add vaccine to API:$error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -116,7 +196,7 @@ class _AddVaccineDialogState extends State<AddVaccineDialog> {
             child: AbsorbPointer(
               child: TextField(
                 controller: administrationDateController,
-                decoration: InputDecoration(labelText: 'Data de Administração'),
+                decoration: InputDecoration(labelText: 'Data de Administração (dd/MM/yyyy)'),
               ),
             ),
           ),
@@ -127,7 +207,7 @@ class _AddVaccineDialogState extends State<AddVaccineDialog> {
             child: AbsorbPointer(
               child: TextField(
                 controller: expirationDateController,
-                decoration: InputDecoration(labelText: 'Data de Vencimento'),
+                decoration: InputDecoration(labelText: 'Data de Vencimento (dd/MM/yyyy)'),
               ),
             ),
           ),
@@ -152,20 +232,30 @@ class _AddVaccineDialogState extends State<AddVaccineDialog> {
               expirationDate: expirationDate,
             );
 
-            widget.onVaccineAdded(vaccine);
-
-            Navigator.of(context).pop();
+            addVaccineToAPI(vaccine).then((_) {
+              widget.onVaccineAdded(vaccine);
+              Navigator.of(context).pop();
+            }).catchError((error) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Erro'),
+                  content: Text('Falha ao adicionar a vacina.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Ok'),
+                    ),
+                  ],
+                ),
+              );
+            });
           },
           child: Text('Adicionar'),
         ),
       ],
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: VaccinesPage(),
-  ));
 }

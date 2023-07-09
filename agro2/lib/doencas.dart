@@ -15,18 +15,18 @@ class _DiseaseHistoryPageState extends State<DiseaseHistoryPage> {
       appBar: AppBar(
         title: Text('Histórico de Doenças'),
       ),
-      backgroundColor: Color.fromRGBO(1, 26, 100, 1), // Altere a cor de fundo para o azul desejado
+      backgroundColor: Color.fromRGBO(1, 26, 100, 1),
       body: ListView.builder(
         itemCount: diseases.length,
         itemBuilder: (context, index) {
           Disease disease = diseases[index];
           return ListTile(
-            title: Text(disease.name),
+            title: Text(disease.name, style: TextStyle(color: Colors.white)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Data de Diagnóstico: ${disease.diagnosisDate}'),
-                Text('Tratamentos Realizados: ${disease.treatments.join(", ")}'),
+                Text('Data de Diagnóstico: ${disease.diagnosisDate}', style: TextStyle(color: Colors.white)),
+                Text('Tratamentos Realizados: ${disease.treatments.join(", ")}', style: TextStyle(color: Colors.white)),
               ],
             ),
           );
@@ -77,6 +77,21 @@ class _AddDiseaseDialogState extends State<AddDiseaseDialog> {
   DateTime diagnosisDate = DateTime.now();
   TextEditingController treatmentsController = TextEditingController();
 
+  void showDatePickerDialog() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    ).then((selectedDate) {
+      if (selectedDate != null) {
+        setState(() {
+          diagnosisDate = selectedDate;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -90,20 +105,7 @@ class _AddDiseaseDialogState extends State<AddDiseaseDialog> {
           ),
           SizedBox(height: 8),
           GestureDetector(
-            onTap: () {
-              showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              ).then((selectedDate) {
-                if (selectedDate != null) {
-                  setState(() {
-                    diagnosisDate = selectedDate;
-                  });
-                }
-              });
-            },
+            onTap: showDatePickerDialog,
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
@@ -114,7 +116,7 @@ class _AddDiseaseDialogState extends State<AddDiseaseDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Data de Diagnóstico: ${formatDate(diagnosisDate)}',
+                    'Data de Diagnóstico: ${DateFormat('yyyy-MM-dd').format(diagnosisDate)}',
                     style: TextStyle(color: Colors.black),
                   ),
                   Icon(Icons.calendar_today),
@@ -143,7 +145,7 @@ class _AddDiseaseDialogState extends State<AddDiseaseDialog> {
 
             Disease disease = Disease(
               name: name,
-              diagnosisDate: formatDate(diagnosisDate),
+              diagnosisDate: DateFormat('yyyy-MM-dd').format(diagnosisDate),
               treatments: treatments,
             );
 
@@ -155,9 +157,5 @@ class _AddDiseaseDialogState extends State<AddDiseaseDialog> {
         ),
       ],
     );
-  }
-
-  String formatDate(DateTime date) {
-    return DateFormat('dd/MM/yyyy').format(date);
   }
 }
