@@ -10,7 +10,7 @@ class CadastroPage extends StatelessWidget {
   final TextEditingController senhaController = TextEditingController();
 
   Future<void> cadastrarUsuario() async {
-    String url = 'http://192.168.235.208:8000/user/';
+    String url = 'http://10.0.0.206:8000/user/';
     Map<String, String> headers = {
       'Content-Type': 'application/json',
     };

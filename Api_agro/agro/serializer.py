@@ -4,7 +4,7 @@ from agro.models import *
 class UserSerializer (serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['nome','cpf','numero','email','senha']
+        fields = ['id','nome','cpf','numero','email','senha']
         
         
         
@@ -12,5 +12,5 @@ class UserSerializer (serializers.ModelSerializer):
 class AnimalSerializer (serializers.ModelSerializer):
     class Meta:
         model = Animal
-        fields = ['categoria','nome','idade','raca','peso']
+        fields = ['categoria','numero_animal','nome','idade','raca','peso']
         

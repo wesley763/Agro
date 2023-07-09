@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     # outros hosts...
-    '192.168.235.208',
+    '10.0.0.206',
 ]
 
     

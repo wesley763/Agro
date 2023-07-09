@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:agro/cadastro_animal.dart';
+import 'package:agro/registro.dart';
+import 'package:agro/vacinas.dart';
+import 'package:agro/parasitas.dart';
+import 'package:agro/doencas.dart';
+import 'package:agro/lembretes.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -49,10 +54,10 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Navegar para a lista de animais
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => AnimalListPage()),
-                // );
+                 Navigator.push(
+                    context,
+                   MaterialPageRoute(builder: (context) => AnimalListPage()),
+               );
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
@@ -72,7 +77,7 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
-                 context,
+                  context,
                 MaterialPageRoute(builder: (context) => CadastroAnimalPage()),
                 );
               },
@@ -96,7 +101,7 @@ class HomePage extends StatelessWidget {
                 // Navegar para a página de registro de vacinas
                 Navigator.push(
                  context,
-                MaterialPageRoute(builder: (context) => CadastroAnimalPage()),
+                MaterialPageRoute(builder: (context) => VaccinesPage()),
                 );
               },
               style: ButtonStyle(
@@ -117,10 +122,10 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Navegar para a página de controle de parasitas
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => ParasiteControlPage()),
-                // );
+                Navigator.push(
+                   context,
+                   MaterialPageRoute(builder: (context) => ParasitesPage()),
+                 );
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
@@ -140,10 +145,10 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Navegar para a página de histórico de doenças
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => DiseaseHistoryPage()),
-                // );
+                 Navigator.push(
+                   context,
+                   MaterialPageRoute(builder: (context) => DiseaseHistoryPage()),
+                 );
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
@@ -163,10 +168,10 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Navegar para a página de lembretes veterinários
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => VeterinaryRemindersPage()),
-                // );
+                 Navigator.push(
+                   context,
+                   MaterialPageRoute(builder: (context) => VeterinaryRemindersPage()),
+                 );
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),

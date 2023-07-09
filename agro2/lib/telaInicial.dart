@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'cadastro_usuario.dart';
 import 'package:agro/home.dart';
 
+
+
 void main() {
   runApp(MyApp());
 }
@@ -51,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
   String errorMessage = '';
 
   Future<void> login(BuildContext context) async {
-    var url = Uri.parse('http://192.168.235.208:8000/user/');
+    var url = Uri.parse('http://10.0.0.206:8000/user/');
 
     var headers = {
       'Content-Type': 'application/json',

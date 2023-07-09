@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class CadastroAnimalPage extends StatefulWidget {
   @override
@@ -8,6 +10,55 @@ class CadastroAnimalPage extends StatefulWidget {
 class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
   List<String> categorias = ['Cavalo', 'Vaca', 'Porco', 'Frango', 'Cabra'];
   String? selectedCategoria;
+
+  final TextEditingController nomeController = TextEditingController();
+  final TextEditingController idadeController = TextEditingController();
+  final TextEditingController racaController = TextEditingController();
+  final TextEditingController pesoController = TextEditingController();
+  final TextEditingController numeroController = TextEditingController();
+
+  Future<void> cadastrarAnimal() async {
+  String url = 'http://10.0.0.206:8000/animal/';
+
+  String nome = nomeController.text;
+  String idade = idadeController.text;
+  String raca = racaController.text;
+  String peso = pesoController.text;
+  String numeroAnimal = numeroController.text;
+  String categoria = selectedCategoria ?? '';
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json',
+  };
+
+  Map<String, dynamic> animalData = {
+    'categoria': categoria,
+    'numero_animal': numeroAnimal,
+    'nome': nome,
+    'idade': idade,
+    'raca': raca,
+    'peso': peso,
+  };
+
+  try {
+    http.Response response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: jsonEncode(animalData),
+    );
+
+    if (response.statusCode == 201) {
+      // Sucesso no cadastro
+      print('Animal cadastrado com sucesso');
+    } else {
+      // Falha no cadastro
+      print('Falha no cadastro do animal');
+    }
+  } catch (error) {
+    print('Erro ao enviar solicitação POST: $error');
+  }
+}
+
 
   @override
   void initState() {
@@ -63,6 +114,7 @@ class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
               ),
               SizedBox(height: 20.0),
               TextFormField(
+                controller: nomeController,
                 decoration: InputDecoration(
                   labelText: 'Nome',
                   labelStyle: TextStyle(
@@ -77,8 +129,25 @@ class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
                   color: Colors.white,
                 ),
               ),
+              SizedBox(height: 20.0),TextFormField(
+                controller: numeroController,
+                decoration: InputDecoration(
+                  labelText: 'Numero do animal',
+                  labelStyle: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
               SizedBox(height: 20.0),
               TextFormField(
+                controller: idadeController,
                 decoration: InputDecoration(
                   labelText: 'Idade',
                   labelStyle: TextStyle(
@@ -95,6 +164,7 @@ class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
               ),
               SizedBox(height: 20.0),
               TextFormField(
+                controller: racaController,
                 decoration: InputDecoration(
                   labelText: 'Raça',
                   labelStyle: TextStyle(
@@ -111,6 +181,7 @@ class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
               ),
               SizedBox(height: 20.0),
               TextFormField(
+                controller: pesoController,
                 decoration: InputDecoration(
                   labelText: 'Peso',
                   labelStyle: TextStyle(
@@ -134,9 +205,7 @@ class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
                   color: Colors.blue,
                   elevation: 7.0,
                   child: GestureDetector(
-                    onTap: () {
-                      // Adicione aqui a lógica para cadastrar o animal
-                    },
+                    onTap: cadastrarAnimal,
                     child: Center(
                       child: Text(
                         'CADASTRAR',
