@@ -268,3 +268,21 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
+
+class UserProvider with ChangeNotifier {
+  String? username;
+
+  void login(String username) {
+    this.username = username;
+    notifyListeners();
+  }
+
+  void logout() {
+    this.username = null;
+    notifyListeners();
+  }
+
+  bool get isLoggedIn => username != null;
+}

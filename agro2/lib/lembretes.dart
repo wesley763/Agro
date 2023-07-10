@@ -1,13 +1,67 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class VeterinaryRemindersPage extends StatefulWidget {
   @override
-  _VeterinaryRemindersPageState createState() => _VeterinaryRemindersPageState();
+  _VeterinaryRemindersPageState createState() =>
+      _VeterinaryRemindersPageState();
 }
 
 class _VeterinaryRemindersPageState extends State<VeterinaryRemindersPage> {
   List<Reminder> reminders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReminderData().catchError((error) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Erro'),
+          content: Text('Falha ao buscar os dados do lembrete.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Ok'),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Future<void> fetchReminderData() async {
+    final response =
+        await http.get(Uri.parse('http://10.0.0.206:8000/lembrete/'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as List<dynamic>;
+
+      setState(() {
+        reminders = data.map((item) => Reminder.fromJson(item)).toList();
+      });
+    } else {
+      throw Exception(
+          'Failed to fetch reminder data: ${response.statusCode}');
+    }
+  }
+
+  Future<void> addReminder(Reminder reminder) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.0.206:8000/lembrete/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(reminder.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      fetchReminderData();
+    } else {
+      throw Exception('Failed to add reminder: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,31 +69,58 @@ class _VeterinaryRemindersPageState extends State<VeterinaryRemindersPage> {
       appBar: AppBar(
         title: Text('Lembretes Veterinários'),
       ),
-      backgroundColor: Color.fromRGBO(1, 26, 100, 1), // Altere a cor de fundo para o azul desejado
-      body: ListView.builder(
-        itemCount: reminders.length,
-        itemBuilder: (context, index) {
-          Reminder reminder = reminders[index];
-          return ListTile(
-            title: Text(reminder.careType, style: TextStyle(color: Colors.white)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Data: ${reminder.date}', style: TextStyle(color: Colors.white)),
-                Text('Hora: ${reminder.time}', style: TextStyle(color: Colors.white)),
-              ],
+      backgroundColor: Color.fromRGBO(1, 26, 100, 1),
+      body: reminders.isNotEmpty
+          ? ListView.builder(
+              itemCount: reminders.length,
+              itemBuilder: (context, index) {
+                Reminder reminder = reminders[index];
+                return ListTile(
+                  title: Text(reminder.careType,
+                      style: TextStyle(color: Colors.white)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Data: ${reminder.date}',
+                          style: TextStyle(color: Colors.white)),
+                      Text('Hora: ${reminder.time}',
+                          style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                );
+              },
+            )
+          : Center(
+              child: Text(
+                'Sem lembretes',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                ),
+              ),
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
             context: context,
             builder: (context) => AddReminderDialog(
               onReminderAdded: (reminder) {
-                setState(() {
-                  reminders.add(reminder);
+                addReminder(reminder).catchError((error) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Erro'),
+                      content: Text('Falha ao adicionar o lembrete.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Ok'),
+                        ),
+                      ],
+                    ),
+                  );
                 });
               },
             ),
@@ -49,18 +130,6 @@ class _VeterinaryRemindersPageState extends State<VeterinaryRemindersPage> {
       ),
     );
   }
-}
-
-class Reminder {
-  final String careType;
-  final String date;
-  final String time;
-
-  Reminder({
-    required this.careType,
-    required this.date,
-    required this.time,
-  });
 }
 
 class AddReminderDialog extends StatefulWidget {
@@ -114,7 +183,7 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Data: ${DateFormat('dd/MM/yyyy').format(selectedDate)}',
+                    'Data: ${DateFormat('yyyy-MM-dd').format(selectedDate)}',
                     style: TextStyle(color: Colors.black),
                   ),
                   Icon(Icons.calendar_today),
@@ -166,7 +235,7 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
         ElevatedButton(
           onPressed: () {
             String careType = careTypeController.text;
-            String date = DateFormat('dd/MM/yyyy').format(selectedDate);
+            String date = DateFormat('yyyy-MM-dd').format(selectedDate);
             String time = selectedTime.format(context);
 
             Reminder reminder = Reminder(
@@ -182,6 +251,34 @@ class _AddReminderDialogState extends State<AddReminderDialog> {
           child: Text('Adicionar'),
         ),
       ],
+    );
+  }
+}
+
+class Reminder {
+  final String careType;
+  final String date;
+  final String time;
+
+  Reminder({
+    required this.careType,
+    required this.date,
+    required this.time,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'cuidado': careType,
+      'data': date,
+      'hora':time,
+    };
+  }
+
+  factory Reminder.fromJson(Map<String, dynamic> json) {
+    return Reminder(
+      careType: json['cuidado'],
+      date: json['data'],
+      time: json['hora'],
     );
   }
 }

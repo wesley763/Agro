@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:agro/cadastro_animal.dart';
 import 'package:agro/registro.dart';
 import 'package:agro/vacinas.dart';
-import 'package:agro/parasitas.dart';
 import 'package:agro/doencas.dart';
 import 'package:agro/lembretes.dart';
+import 'package:agro/editar_user.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -16,8 +16,12 @@ class HomePage extends StatelessWidget {
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
-              // Lógica para lidar com a seleção da opção de configuração
-              // ...
+              if (value == 'perfil') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EdicaoCadastroPage(userId: 'seu_user_id_aqui')),
+                );
+              }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               const PopupMenuItem<String>(
@@ -54,10 +58,10 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Navegar para a lista de animais
-                 Navigator.push(
-                    context,
-                   MaterialPageRoute(builder: (context) => AnimalListPage()),
-               );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AnimalListPage()),
+                );
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
@@ -78,7 +82,7 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                MaterialPageRoute(builder: (context) => CadastroAnimalPage()),
+                  MaterialPageRoute(builder: (context) => CadastroAnimalPage()),
                 );
               },
               style: ButtonStyle(
@@ -100,8 +104,8 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 // Navegar para a página de registro de vacinas
                 Navigator.push(
-                 context,
-                MaterialPageRoute(builder: (context) => VaccinesPage()),
+                  context,
+                  MaterialPageRoute(builder: (context) => VaccinesPage()),
                 );
               },
               style: ButtonStyle(
@@ -121,34 +125,11 @@ class HomePage extends StatelessWidget {
             SizedBox(height: 36),
             ElevatedButton(
               onPressed: () {
-                // Navegar para a página de controle de parasitas
-                Navigator.push(
-                   context,
-                   MaterialPageRoute(builder: (context) => ParasitesPage()),
-                 );
-              },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100.0),
-                  ),
-                ),
-              ),
-              child: SizedBox(
-                width: 300,
-                height: 50,
-                child: Center(child: Text('Controle de Parasitas')),
-              ),
-            ),
-            SizedBox(height: 36),
-            ElevatedButton(
-              onPressed: () {
                 // Navegar para a página de histórico de doenças
-                 Navigator.push(
-                   context,
-                   MaterialPageRoute(builder: (context) => DiseaseHistoryPage()),
-                 );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DiseaseHistoryPage()),
+                );
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
@@ -168,10 +149,10 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Navegar para a página de lembretes veterinários
-                 Navigator.push(
-                   context,
-                   MaterialPageRoute(builder: (context) => VeterinaryRemindersPage()),
-                 );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => VeterinaryRemindersPage()),
+                );
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),

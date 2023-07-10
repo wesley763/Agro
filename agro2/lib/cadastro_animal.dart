@@ -174,6 +174,7 @@ class _CadastroAnimalPageState extends State<CadastroAnimalPage> {
     );
   },
 ),
+
               TextFormField(
                 controller: racaController,
                 decoration: InputDecoration(

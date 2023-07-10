@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class DiseaseHistoryPage extends StatefulWidget {
@@ -10,36 +12,115 @@ class _DiseaseHistoryPageState extends State<DiseaseHistoryPage> {
   List<Disease> diseases = [];
 
   @override
+  void initState() {
+    super.initState();
+    fetchDiseaseData().catchError((error) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Erro'),
+          content: Text('Falha ao buscar os dados das doenças.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Ok'),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Future<void> fetchDiseaseData() async {
+    final response =
+        await http.get(Uri.parse('http://10.0.0.206:8000/doencas/'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as List<dynamic>;
+
+      setState(() {
+        diseases = data.map((item) => Disease.fromJson(item)).toList();
+      });
+    } else {
+      throw Exception(
+          'Failed to fetch disease data: ${response.statusCode}');
+    }
+  }
+
+  Future<void> addDisease(Disease disease) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.0.206:8000/doencas/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(disease.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      fetchDiseaseData();
+    } else {
+      throw Exception('Failed to add disease: ${response.statusCode}');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Histórico de Doenças'),
       ),
       backgroundColor: Color.fromRGBO(1, 26, 100, 1),
-      body: ListView.builder(
-        itemCount: diseases.length,
-        itemBuilder: (context, index) {
-          Disease disease = diseases[index];
-          return ListTile(
-            title: Text(disease.name, style: TextStyle(color: Colors.white)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Data de Diagnóstico: ${disease.diagnosisDate}', style: TextStyle(color: Colors.white)),
-                Text('Tratamentos Realizados: ${disease.treatments.join(", ")}', style: TextStyle(color: Colors.white)),
-              ],
+      body: diseases.isNotEmpty
+          ? ListView.builder(
+              itemCount: diseases.length,
+              itemBuilder: (context, index) {
+                Disease disease = diseases[index];
+                return ListTile(
+                  title: Text(disease.name,
+                      style: TextStyle(color: Colors.white)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Data de Diagnóstico: ${disease.diagnosisDate}',
+                          style: TextStyle(color: Colors.white)),
+                      Text(
+                          'Tratamentos Realizados: ${disease.treatments.join(", ")}',
+                          style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                );
+              },
+            )
+          : Center(
+              child: Text(
+                'Sem doenças',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                ),
+              ),
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
             context: context,
             builder: (context) => AddDiseaseDialog(
               onDiseaseAdded: (disease) {
-                setState(() {
-                  diseases.add(disease);
+                addDisease(disease).catchError((error) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Erro'),
+                      content: Text('Falha ao adicionar a doença.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Ok'),
+                        ),
+                      ],
+                    ),
+                  );
                 });
               },
             ),
@@ -61,6 +142,22 @@ class Disease {
     required this.diagnosisDate,
     required this.treatments,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'nome_doenca': name,
+      'data_diagnostico': diagnosisDate,
+      'tratamento': treatments.join(','),
+    };
+  }
+
+  factory Disease.fromJson(Map<String, dynamic> json) {
+    return Disease(
+      name: json['nome_doenca'],
+      diagnosisDate: json['data_diagnostico'],
+      treatments: json['tratamento'].split(','),
+    );
+  }
 }
 
 class AddDiseaseDialog extends StatefulWidget {
